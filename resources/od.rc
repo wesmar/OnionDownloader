@@ -1,0 +1,85 @@
+#pragma code_page(65001)
+#include "Resource.h"
+#include <windows.h>
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+
+// app.ico is the build product: app_orig.ico with the LZX Tor cabinet appended.
+// It is referenced twice, and the resource compiler treats each use differently:
+//   - as ICON, the header is parsed and the trailing cabinet is ignored, so the
+//     window/taskbar icon is a normal small icon;
+//   - as RCDATA, the file is copied verbatim, so the appended cabinet survives.
+// build.ps1 regenerates app.ico with CAB LZX-21 only when resources\tor.exe or
+// app_orig.ico changes. The checked-in app.ico also keeps direct IDE builds
+// working without first running the script.
+// The ICON image is architecture-neutral, so the same app.ico serves as the
+// window/taskbar icon on every target. The RCDATA payload is architecture
+// specific: build.ps1 packs the matching native tor.exe into app.ico (x64) or
+// app-arm64.ico (ARM64), and OD_ARM64 (defined by the project for ARM64 builds)
+// selects which one is embedded verbatim.
+IDI_APP_ICON    ICON   "app.ico"
+#ifdef OD_ARM64
+IDR_TOR_PAYLOAD RCDATA "app-arm64.ico"
+#else
+IDR_TOR_PAYLOAD RCDATA "app.ico"
+#endif
+
+// Main Application Menu
+IDR_MAIN_MENU MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Add Download...\tCtrl+N",    IDM_FILE_ADD
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit\tAlt+F4",               IDM_FILE_EXIT
+    END
+    POPUP "&Download"
+    BEGIN
+        MENUITEM "&Resume / Start",              IDM_DOWNLOAD_START
+        MENUITEM "&Pause",                      IDM_DOWNLOAD_PAUSE
+        MENUITEM "&Remove Task",                IDM_DOWNLOAD_REMOVE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "Toggle &Dark / Mica Theme",   IDM_VIEW_DARK_MODE
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About Onion Downloader...",  IDM_HELP_ABOUT
+    END
+END
+
+// Version Information
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+#ifdef _DEBUG
+FILEFLAGS       VS_FF_DEBUG
+#else
+FILEFLAGS       0x0L
+#endif
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName",      "PJATK Forensic & Systems Lab"
+            VALUE "FileDescription",  "Onion Downloader Native WinAPI Engine"
+            VALUE "FileVersion",      "1.0.0.0"
+            VALUE "InternalName",     "od.exe"
+            VALUE "LegalCopyright",   "© Marek Wesołowski - (2026)"
+            VALUE "OriginalFilename", "od.exe"
+            VALUE "ProductName",      "Onion Downloader"
+            VALUE "ProductVersion",   "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END

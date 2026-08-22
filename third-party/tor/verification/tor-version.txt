@@ -1,0 +1,4 @@
+Tor version 0.4.9.11.
+This build of Tor is covered by the GNU General Public License (https://www.gnu.org/licenses/gpl-3.0.en.html)
+Tor is running on Windows 8 [or later] with Libevent 2.1.12-stable, OpenSSL 3.5.7, Zlib 1.3.1, Liblzma N/A, Libzstd N/A and Unknown N/A as libc.
+Tor compiled with GCC version 13.0.0

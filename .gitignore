@@ -1,0 +1,40 @@
+# Local publishing helpers
+git-push.sh
+pack-data.sh
+release-update.sh
+release-now.sh
+release-now.md
+
+# Build output and IDE state
+bin/
+obj/
+x64/
+.vs/
+build/
+dist/
+data/
+setup.rpt
+
+# Generated packages and transient download state
+*.7z
+*.zip
+*.cab
+*.odpart
+*.odmeta
+*.odmeta.tmp
+session.json
+
+# All binaries are excluded from the repository. The Tor transport is not
+# shipped as a loose resources/tor.exe: it already lives compressed inside
+# resources/app.ico, and build-tor.sh regenerates tor.exe locally only when the
+# engine itself is rebuilt from source.
+*.exe
+*.dll
+
+# Local environment
+.env
+.env.*
+*.user
+*.suo
+*.log
+

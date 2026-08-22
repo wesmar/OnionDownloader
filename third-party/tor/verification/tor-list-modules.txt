@@ -1,0 +1,4 @@
+relay: no
+dirauth: no
+dircache: no
+pow: yes

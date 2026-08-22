@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <ProjectGuid>{A1B2C3D4-5678-90AB-CDEF-1234567890AB}</ProjectGuid>
+    <RootNamespace>od</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>x64\Release\</OutDir>
+    <IntDir>obj\od\x64\Release\</IntDir>
+    <TargetName>od_x64</TargetName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>x64\Debug\</OutDir>
+    <IntDir>obj\od\x64\Debug\</IntDir>
+    <TargetName>od_x64</TargetName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <OutDir>ARM64\Release\</OutDir>
+    <IntDir>obj\od\ARM64\Release\</IntDir>
+    <TargetName>od_arm64</TargetName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <OutDir>ARM64\Debug\</OutDir>
+    <IntDir>obj\od\ARM64\Debug\</IntDir>
+    <TargetName>od</TargetName>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <StringPooling>true</StringPooling>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;NOMINMAX;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!-- /Brepro strips the compiler timestamp so object files are byte-identical between builds -->
+      <AdditionalOptions>/utf-8 /permissive- /FS /Brepro %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>src;resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <AdditionalDependencies>user32.lib;gdi32.lib;comctl32.lib;shell32.lib;advapi32.lib;dwmapi.lib;uxtheme.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <!-- /BREPRO replaces the PE timestamp with a content hash: reproducible output -->
+      <AdditionalOptions>/BREPRO /HIGHENTROPYVA %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>manifest.xml;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;UNICODE;_UNICODE;NOMINMAX;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/utf-8 /permissive- /FS /Brepro %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>src;resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>user32.lib;gdi32.lib;comctl32.lib;shell32.lib;advapi32.lib;dwmapi.lib;uxtheme.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/BREPRO /HIGHENTROPYVA %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>manifest.xml;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ResourceCompile>
+      <PreprocessorDefinitions>OD_ARM64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <StringPooling>true</StringPooling>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;NOMINMAX;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!-- /Brepro strips the compiler timestamp so object files are byte-identical between builds -->
+      <AdditionalOptions>/utf-8 /permissive- /FS /Brepro %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>src;resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <AdditionalDependencies>user32.lib;gdi32.lib;comctl32.lib;shell32.lib;advapi32.lib;dwmapi.lib;uxtheme.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <!-- /BREPRO replaces the PE timestamp with a content hash: reproducible output -->
+      <AdditionalOptions>/BREPRO /HIGHENTROPYVA %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>manifest.xml;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <ResourceCompile>
+      <PreprocessorDefinitions>OD_ARM64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;UNICODE;_UNICODE;NOMINMAX;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/utf-8 /permissive- /FS /Brepro %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>src;resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>user32.lib;gdi32.lib;comctl32.lib;shell32.lib;advapi32.lib;dwmapi.lib;uxtheme.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/BREPRO /HIGHENTROPYVA %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>manifest.xml;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <ResourceCompile Include="resources\od.rc">
+      <AdditionalIncludeDirectories>resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClInclude Include="resources\Resource.h" />
+    <ClInclude Include="src\cli\CliParser.h" />
+    <ClInclude Include="src\cli\ConsoleApp.h" />
+    <ClInclude Include="src\cli\ConsoleManager.h" />
+    <ClInclude Include="src\core\DownloadEngine.h" />
+    <ClInclude Include="src\core\DownloadTask.h" />
+    <ClInclude Include="src\core\PartFile.h" />
+    <ClInclude Include="src\core\SegmentMap.h" />
+    <ClInclude Include="src\core\SessionManager.h" />
+    <ClInclude Include="src\core\StringUtils.h" />
+    <ClInclude Include="src\core\TorExtractor.h" />
+    <ClInclude Include="src\core\TorPool.h" />
+    <ClInclude Include="src\net\HttpClient.h" />
+    <ClInclude Include="src\net\Socks5.h" />
+    <ClInclude Include="src\ui\Controls.h" />
+    <ClInclude Include="src\ui\DpiHelper.h" />
+    <ClInclude Include="src\ui\DwmMicaHelper.h" />
+    <ClInclude Include="src\ui\OdWindow.h" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClCompile Include="src\app\Main.cpp" />
+    <ClCompile Include="src\cli\CliParser.cpp" />
+    <ClCompile Include="src\cli\ConsoleApp.cpp" />
+    <ClCompile Include="src\cli\ConsoleManager.cpp" />
+    <ClCompile Include="src\core\DownloadEngine.cpp" />
+    <ClCompile Include="src\core\PartFile.cpp" />
+    <ClCompile Include="src\core\SegmentMap.cpp" />
+    <ClCompile Include="src\core\SessionManager.cpp" />
+    <ClCompile Include="src\core\StringUtils.cpp" />
+    <ClCompile Include="src\core\TorExtractor.cpp" />
+    <ClCompile Include="src\core\TorPool.cpp" />
+    <ClCompile Include="src\net\HttpClient.cpp" />
+    <ClCompile Include="src\net\Socks5.cpp" />
+    <ClCompile Include="src\ui\Controls.cpp" />
+    <ClCompile Include="src\ui\DpiHelper.cpp" />
+    <ClCompile Include="src\ui\DwmMicaHelper.cpp" />
+    <ClCompile Include="src\ui\OdWindow.cpp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="manifest.xml" />
+    <None Include="build.ps1" />
+    <None Include="build-tor.sh" />
+    <None Include="build-tor-arm64.sh" />
+    <None Include="README.md" />
+  </ItemGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="app">
+      <UniqueIdentifier>{1a000000-0000-4000-9000-000000000000}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cli">
+      <UniqueIdentifier>{1a000001-0000-4000-9000-000000000001}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{1a000002-0000-4000-9000-000000000002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="net">
+      <UniqueIdentifier>{1a000003-0000-4000-9000-000000000003}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{1a000004-0000-4000-9000-000000000004}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{1a000005-0000-4000-9000-000000000005}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="build">
+      <UniqueIdentifier>{1a000006-0000-4000-9000-000000000006}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClCompile Include="src\app\Main.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cli\ConsoleApp.cpp">
+      <Filter>cli</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cli\CliParser.cpp">
+      <Filter>cli</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cli\ConsoleManager.cpp">
+      <Filter>cli</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\DownloadEngine.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\PartFile.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\SegmentMap.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\SessionManager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\StringUtils.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\TorExtractor.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\TorPool.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\net\HttpClient.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="src\net\Socks5.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\Controls.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\DpiHelper.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\DwmMicaHelper.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\OdWindow.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClInclude Include="src\cli\CliParser.h">
+      <Filter>cli</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cli\ConsoleApp.h">
+      <Filter>cli</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cli\ConsoleManager.h">
+      <Filter>cli</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\DownloadEngine.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\DownloadTask.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\PartFile.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\SegmentMap.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\SessionManager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\StringUtils.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\TorExtractor.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\TorPool.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\net\HttpClient.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="src\net\Socks5.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\Controls.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\DpiHelper.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\DwmMicaHelper.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\OdWindow.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\Resource.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ResourceCompile Include="resources\od.rc">
+      <Filter>resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="manifest.xml">
+      <Filter>build</Filter>
+    </None>
+    <None Include="build.ps1">
+      <Filter>build</Filter>
+    </None>
+    <None Include="build-tor.sh">
+      <Filter>build</Filter>
+    </None>
+    <None Include="build-tor-arm64.sh">
+      <Filter>build</Filter>
+    </None>
+    <None Include="README.md">
+      <Filter>build</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,3 @@
+Format: COFF-ARM64
+Arch: aarch64
+  Machine: IMAGE_FILE_MACHINE_ARM64 (0xAA64)
