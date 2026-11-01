@@ -107,7 +107,7 @@ bool PartFile::Open(const std::filesystem::path& finalPath, uint64_t totalBytes,
         nullptr);
 
     if (m_primary == INVALID_HANDLE_VALUE) {
-        Fail(errorOut, "cannot create " + m_partPath.string() + " (" + LastErrorText() + ")");
+        Fail(errorOut, "cannot create " + StringUtils::WideToUtf8(m_partPath.wstring()) + " (" + LastErrorText() + ")");
         return false;
     }
 
@@ -161,7 +161,7 @@ bool PartFile::Finalize(std::string* errorOut) {
     std::filesystem::remove(m_finalPath, ec);
     std::filesystem::rename(m_partPath, m_finalPath, ec);
     if (ec) {
-        Fail(errorOut, "cannot rename partial file to " + m_finalPath.string());
+        Fail(errorOut, "cannot rename partial file to " + StringUtils::WideToUtf8(m_finalPath.wstring()));
         return false;
     }
     return true;

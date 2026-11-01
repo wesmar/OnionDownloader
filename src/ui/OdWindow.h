@@ -42,7 +42,6 @@ public:
 
     /// Called from the ListView subclass when its header asks to be drawn.
     LRESULT OnHeaderCustomDraw(LPNMCUSTOMDRAW customDraw);
-    void PaintUrlCue(HWND edit, HDC dc) const;
 
 private:
     static LRESULT CALLBACK WndProcSetup(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

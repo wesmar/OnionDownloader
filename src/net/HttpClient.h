@@ -78,7 +78,11 @@ public:
                       uint64_t firstByte,
                       uint64_t lastByte,
                       HttpResponse& response,
-                      std::string* errorOut);
+                      std::string* errorOut,
+                      std::string_view cookie = {});
+
+    /// Solve an onion service's /_gate/challenge + /_gate/verify SHA-256 PoW gate.
+    bool SolvePoWGate(const Url& originUrl, std::string& cookieOut, std::string* errorOut);
 
     /// Read up to len body bytes. Returns 0 on clean end of stream, -1 on error.
     int ReadBody(void* buffer, size_t len);

@@ -353,7 +353,8 @@ bool TorPool::Start(uint32_t instances, const StatusCallback& onStatus) {
         }
         m_instances[i].socksPort = socksPort;
         m_instances[i].controlPort = controlPort;
-        m_instances[i].dataDir = (root / std::to_wstring(i)).wstring();
+        const uint32_t slot = static_cast<uint32_t>((socksPort - kSocksPortBase) / 2);
+        m_instances[i].dataDir = (root / std::to_wstring(slot)).wstring();
         nextPort = static_cast<uint16_t>(socksPort + 2);
     }
 

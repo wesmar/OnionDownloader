@@ -114,6 +114,9 @@ DownloadEngine::DownloadEngine(TorPool& torPool)
             job->task.status = TaskStatus::Paused;
         }
         job->workers = (task.totalSplits > 0) ? task.totalSplits : 10;
+        if (!task.destinationPath.empty() && !task.fileName.empty()) {
+            job->finalPath = std::filesystem::path(task.destinationPath) / task.fileName;
+        }
         m_jobs.push_back(std::move(job));
     }
 
@@ -229,7 +232,8 @@ bool DownloadEngine::AddDownload(const std::wstring& url, const std::wstring& de
             auto created = std::make_unique<Job>();
             created->task.gid = gid;
             created->task.url = trimmed;
-            created->task.fileName = StringUtils::ExtractFileName(trimmed);
+            created->task.fileName = PartFile::SanitizeFileName(
+                StringUtils::Utf8ToWide(net::PercentDecode(StringUtils::WideToUtf8(StringUtils::ExtractFileName(trimmed)))));
             created->task.destinationPath = destination.wstring();
             created->task.status = TaskStatus::Queued;
             created->task.totalSplits = std::clamp<uint32_t>(workers, 1, 64);
@@ -242,6 +246,10 @@ bool DownloadEngine::AddDownload(const std::wstring& url, const std::wstring& de
             job->task.destinationPath = destination.wstring();
             job->task.totalSplits = std::clamp<uint32_t>(workers, 1, 64);
             job->task.errorMessage.clear();
+            if (job->task.status == TaskStatus::Completed) {
+                job->task.completedBytes = 0;
+            }
+            job->task.status = TaskStatus::Queued;
         }
         job->url = parsed;
         job->workers = std::clamp<uint32_t>(workers, 1, 64);
@@ -298,7 +306,11 @@ bool DownloadEngine::Remove(const std::wstring& gid, bool deletePartialFile) {
     }
 
     StopJob(*job);
-    const std::filesystem::path finalPath = job->finalPath;
+    const std::filesystem::path finalPath = !job->finalPath.empty()
+        ? job->finalPath
+        : ((!job->task.destinationPath.empty() && !job->task.fileName.empty())
+               ? (std::filesystem::path(job->task.destinationPath) / job->task.fileName)
+               : std::filesystem::path{});
 
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -345,6 +357,10 @@ bool DownloadEngine::ProbeResource(Job& job, std::string& errorOut) {
     net::Url current = job.url;
 
     for (int redirect = 0; redirect <= kMaxRedirects; ++redirect) {
+        if (job.stopRequested.load()) {
+            errorOut = "cancelled";
+            return false;
+        }
         net::HttpConnection probe;
         {
             std::lock_guard<std::mutex> lock(job.connectionsMutex);
@@ -365,9 +381,37 @@ bool DownloadEngine::ProbeResource(Job& job, std::string& errorOut) {
         probe.SetIoTimeouts(kDataRecvTimeoutMs, kDataSendTimeoutMs);
 
         net::HttpResponse response;
-        if (!probe.RequestRange(current, true, 0, 0, response, &errorOut)) {
+        std::string cookie;
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            cookie = job.sessionCookie;
+        }
+        if (!probe.RequestRange(current, true, 0, 0, response, &errorOut, cookie)) {
             unregisterProbe();
             return false;
+        }
+
+        if (response.statusCode == 401) {
+            Log(L"Solving onion anti-DDoS PoW challenge...");
+            if (!response.hasContentLength || response.WantsClose() ||
+                !probe.DrainBody(response.contentLength)) {
+                if (!probe.Open(m_torPool.SocksPortForWorker(0), isolation + "-pow", "od", current,
+                                kHandshakeTimeoutMs, &errorOut)) {
+                    unregisterProbe();
+                    return false;
+                }
+                probe.SetIoTimeouts(kDataRecvTimeoutMs, kDataSendTimeoutMs);
+            }
+            std::string solvedCookie;
+            if (probe.SolvePoWGate(current, solvedCookie, &errorOut)) {
+                {
+                    std::lock_guard<std::mutex> lock(m_mutex);
+                    job.sessionCookie = solvedCookie;
+                    job.powGateRequired = true;
+                }
+                unregisterProbe();
+                continue;
+            }
         }
 
         if (response.statusCode >= 300 && response.statusCode < 400) {
@@ -479,6 +523,8 @@ void DownloadEngine::ControllerMain(Job& job, bool freshStart) {
     }
 
     job.completedBytes = job.segments->CompletedBytes();
+    job.lastSampleBytes = job.completedBytes.load();
+    job.lastSampleTick = NowTicks();
 
     job.file = std::make_unique<PartFile>();
     std::string fileError;
@@ -563,6 +609,11 @@ void DownloadEngine::WorkerMain(Job& job, uint32_t workerIndex) {
     const uint16_t socksPort = m_torPool.SocksPortForWorker(workerIndex);
     uint32_t credentialNonce = 0;
     int consecutiveFailures = 0;
+    std::string workerCookie;
+    if (workerIndex == 0) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        workerCookie = job.sessionCookie;
+    }
 
     while (!job.stopRequested.load()) {
         auto claimed = job.segments->ClaimNext();
@@ -590,21 +641,44 @@ void DownloadEngine::WorkerMain(Job& job, uint32_t workerIndex) {
                     break;
                 }
                 connection.SetIoTimeouts(kDataRecvTimeoutMs, kDataSendTimeoutMs);
+                if (job.powGateRequired && workerCookie.empty()) {
+                    std::string gateError;
+                    if (!connection.SolvePoWGate(job.url, workerCookie, &gateError)) {
+                        failureReason = StringUtils::Utf8ToWide(gateError);
+                        break;
+                    }
+                }
             }
 
             net::HttpResponse response;
             std::string requestError;
             if (!connection.RequestRange(job.url, job.rangeSupported,
                                          segment.firstByte, segment.lastByte,
-                                         response, &requestError)) {
+                                         response, &requestError, workerCookie)) {
                 failureReason = StringUtils::Utf8ToWide(requestError);
+                break;
+            }
+
+            if (response.statusCode == 401) {
+                workerCookie.clear();
+                job.powGateRequired = true;
+                if (!response.hasContentLength || response.WantsClose() ||
+                    !connection.DrainBody(response.contentLength)) {
+                    connection.Close();
+                    continue;
+                }
+                if (connection.SolvePoWGate(job.url, workerCookie, &requestError)) {
+                    continue;
+                }
+                connection.Close();
                 break;
             }
 
             const int expectedStatus = job.rangeSupported ? 206 : 200;
             if (response.statusCode != expectedStatus) {
                 failureReason = DescribeHttpStatus(response.statusCode, response.statusText);
-                if (response.statusCode >= 400 && response.statusCode < 500) {
+                if (response.statusCode >= 400 && response.statusCode < 500 &&
+                    response.statusCode != 401 && response.statusCode != 429) {
                     // The resource is gone or forbidden: retrying on another
                     // circuit cannot help, so stop the whole job.
                     job.stopRequested = true;
@@ -665,6 +739,7 @@ void DownloadEngine::WorkerMain(Job& job, uint32_t workerIndex) {
         job.completedBytes.fetch_sub(segmentWritten);
         job.segments->Release(segment.index);
         connection.Close();
+        workerCookie.clear();
         ++credentialNonce;
         ++consecutiveFailures;
 
@@ -680,7 +755,9 @@ void DownloadEngine::WorkerMain(Job& job, uint32_t workerIndex) {
         // Linear backoff: a congested onion service recovers faster than an
         // exponential curve would allow us to notice.
         const DWORD backoffMs = static_cast<DWORD>(std::min(consecutiveFailures, 5) * 1000);
-        ::Sleep(backoffMs);
+        for (DWORD waited = 0; waited < backoffMs && !job.stopRequested.load(); waited += 50) {
+            ::Sleep(std::min<DWORD>(50, backoffMs - waited));
+        }
     }
     {
         std::lock_guard<std::mutex> lock(job.connectionsMutex);

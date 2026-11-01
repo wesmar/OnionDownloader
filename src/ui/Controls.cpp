@@ -168,6 +168,16 @@ int Controls::InsertListItem(HWND hList, int itemIndex, const wchar_t* text, LPA
 }
 
 void Controls::SetListSubItem(HWND hList, int itemIndex, int subItemIndex, const wchar_t* text) {
+    wchar_t existing[512] = {};
+    LVITEMW query{};
+    query.iSubItem = subItemIndex;
+    query.pszText = existing;
+    query.cchTextMax = static_cast<int>(std::size(existing));
+    ::SendMessageW(hList, LVM_GETITEMTEXTW, static_cast<WPARAM>(itemIndex),
+                   reinterpret_cast<LPARAM>(&query));
+    if (::wcscmp(existing, text) == 0) {
+        return;
+    }
     LVITEMW item{};
     item.mask = LVIF_TEXT;
     item.iItem = itemIndex;

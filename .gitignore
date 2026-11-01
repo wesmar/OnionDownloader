@@ -4,6 +4,8 @@ pack-data.sh
 release-update.sh
 release-now.sh
 release-now.md
+release/
+github.sh
 
 # Build output and IDE state
 bin/
@@ -37,4 +39,3 @@ session.json
 *.user
 *.suo
 *.log
-

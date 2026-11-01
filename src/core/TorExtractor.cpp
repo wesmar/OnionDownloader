@@ -174,10 +174,10 @@ FNOPEN(fdi_open) {
     const DWORD access = (oflag & _O_WRONLY || oflag & _O_RDWR) ? GENERIC_WRITE : GENERIC_READ;
     const DWORD disposition = (oflag & _O_CREAT) ? CREATE_ALWAYS : OPEN_EXISTING;
 
-    const int wideLen = ::MultiByteToWideChar(CP_ACP, 0, pszFile, -1, nullptr, 0);
+    const int wideLen = ::MultiByteToWideChar(CP_UTF8, 0, pszFile, -1, nullptr, 0);
     std::wstring widePath(static_cast<size_t>(wideLen > 0 ? wideLen - 1 : 0), L'\0');
     if (wideLen > 0) {
-        ::MultiByteToWideChar(CP_ACP, 0, pszFile, -1, widePath.data(), wideLen);
+        ::MultiByteToWideChar(CP_UTF8, 0, pszFile, -1, widePath.data(), wideLen);
     }
 
     HANDLE file = ::CreateFileW(widePath.c_str(), access, FILE_SHARE_READ, nullptr,
@@ -278,10 +278,10 @@ FNFDINOTIFY(fdi_notify) {
             (void)wideLen;
 
             const int narrowLen = ::WideCharToMultiByte(
-                CP_ACP, 0, g_context->targetPath.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                CP_UTF8, 0, g_context->targetPath.c_str(), -1, nullptr, 0, nullptr, nullptr);
             std::string narrow(static_cast<size_t>(narrowLen > 0 ? narrowLen - 1 : 0), '\0');
             if (narrowLen > 0) {
-                ::WideCharToMultiByte(CP_ACP, 0, g_context->targetPath.c_str(), -1,
+                ::WideCharToMultiByte(CP_UTF8, 0, g_context->targetPath.c_str(), -1,
                                       narrow.data(), narrowLen, nullptr, nullptr);
             }
             g_context->wroteTarget = true;

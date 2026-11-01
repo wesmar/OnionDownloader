@@ -7,11 +7,22 @@
 
 #include <windows.h>
 
+#include <atomic>
+
 namespace od::cli {
 
 namespace {
 
 constexpr DWORD kPollIntervalMs = 300;
+std::atomic<bool> s_interrupted{false};
+
+BOOL WINAPI ConsoleCtrlHandler(DWORD ctrlType) {
+    if (ctrlType == CTRL_C_EVENT || ctrlType == CTRL_BREAK_EVENT || ctrlType == CTRL_CLOSE_EVENT) {
+        s_interrupted = true;
+        return TRUE;
+    }
+    return FALSE;
+}
 
 } // namespace
 
@@ -19,6 +30,8 @@ int ConsoleApp::Run(const CliOptions& options) {
     namespace core = od::core;
 
     ConsoleManager::InitializeConsole();
+    s_interrupted = false;
+    ::SetConsoleCtrlHandler(ConsoleCtrlHandler, TRUE);
     ConsoleManager::WriteLine(L"[+] Onion Downloader - Multi-Circuit Tor Engine v1.0.0");
     ConsoleManager::WriteLine(L"[+] URL     : " + options.url);
     ConsoleManager::WriteLine(L"[+] Output  : " + options.outputDir);
@@ -50,6 +63,11 @@ int ConsoleApp::Run(const CliOptions& options) {
 
     int exitCode = kSuccess;
     for (;;) {
+        if (s_interrupted.load()) {
+            ConsoleManager::WriteLine(L"\n\n[*] Interrupted by user - saving resume state...");
+            exitCode = kDownloadFailed;
+            break;
+        }
         ::Sleep(kPollIntervalMs);
 
         core::DownloadTask task;
@@ -79,6 +97,7 @@ int ConsoleApp::Run(const CliOptions& options) {
 
     engine.Shutdown();
     torPool.Shutdown();
+    ::SetConsoleCtrlHandler(ConsoleCtrlHandler, FALSE);
     return exitCode;
 }
 

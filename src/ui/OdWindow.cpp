@@ -69,7 +69,8 @@ public:
         if (data == nullptr || FAILED(data->GetData(&format, &medium))) return S_OK;
         const auto* text = static_cast<const wchar_t*>(::GlobalLock(medium.hGlobal));
         if (text != nullptr) {
-            ::SetWindowTextW(m_edit, text);
+            const std::wstring trimmed = core::StringUtils::Trim(text);
+            ::SetWindowTextW(m_edit, trimmed.c_str());
             ::SendMessageW(m_edit, EM_SETSEL, static_cast<WPARAM>(-1), static_cast<LPARAM>(-1));
             ::SetFocus(m_edit);
             ::GlobalUnlock(medium.hGlobal);
@@ -126,15 +127,7 @@ LRESULT CALLBACK EditSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
             return 0;
         }
     }
-    const LRESULT result = ::CallWindowProcW(s_originalEditProc, hWnd, uMsg, wParam, lParam);
-    if (uMsg == WM_PAINT && ::GetWindowTextLengthW(hWnd) == 0) {
-        auto* window = reinterpret_cast<OdWindow*>(
-            ::GetWindowLongPtrW(::GetParent(hWnd), GWLP_USERDATA));
-        HDC dc = ::GetDC(hWnd);
-        if (window != nullptr && dc != nullptr) window->PaintUrlCue(hWnd, dc);
-        if (dc != nullptr) ::ReleaseDC(hWnd, dc);
-    }
-    return result;
+    return ::CallWindowProcW(s_originalEditProc, hWnd, uMsg, wParam, lParam);
 }
 
 /**
@@ -314,7 +307,8 @@ void OdWindow::PasteUrlFromClipboard() {
     if (data != nullptr) {
         const auto* text = static_cast<const wchar_t*>(::GlobalLock(data));
         if (text != nullptr) {
-            ::SetWindowTextW(m_hEditUrl, text);
+            const std::wstring trimmed = core::StringUtils::Trim(text);
+            ::SetWindowTextW(m_hEditUrl, trimmed.c_str());
             ::SendMessageW(m_hEditUrl, EM_SETSEL, static_cast<WPARAM>(-1), static_cast<LPARAM>(-1));
             ::GlobalUnlock(data);
         }
@@ -424,6 +418,7 @@ LRESULT OdWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam) {
                 notification->code == LVN_ITEMCHANGED) {
                 core::DownloadTask selected;
                 const bool hasSelection = TryGetSelectedTask(selected);
+            
                 EnableWindowIfChanged(m_hBtnPause, hasSelection && selected.status != core::TaskStatus::Completed);
                 EnableWindowIfChanged(m_hBtnRemove, hasSelection);
                 if (hasSelection) {
@@ -682,6 +677,8 @@ void OdWindow::CreateLayout() {
         0, 0, 0, 0, m_hWnd, reinterpret_cast<HMENU>(IDC_EDIT_URL), m_hInstance, nullptr);
     s_originalEditProc = reinterpret_cast<WNDPROC>(
         ::SetWindowLongPtrW(m_hEditUrl, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(EditSubclassProc)));
+    ::SendMessageW(m_hEditUrl, EM_SETCUEBANNER, TRUE,
+                   reinterpret_cast<LPARAM>(L"Paste an onion URL, e.g. http://....onion/file.dat"));
 
     struct ButtonSpec {
         const wchar_t* caption;
@@ -747,20 +744,6 @@ void OdWindow::CreateLayout() {
     ::SendMessageW(m_hStatusBar, SB_SETTEXTW, 2, reinterpret_cast<LPARAM>(L""));
     ::EnableWindow(m_hBtnPause, FALSE);
     ::EnableWindow(m_hBtnRemove, FALSE);
-}
-
-void OdWindow::PaintUrlCue(HWND edit, HDC dc) const {
-    RECT rect{};
-    ::GetClientRect(edit, &rect);
-    rect.left += DpiHelper::Scale(7, m_currentDpi);
-    rect.right -= DpiHelper::Scale(7, m_currentDpi);
-    const auto& palette = DwmMicaHelper::GetPalette(m_darkMode);
-    HGDIOBJ previousFont = ::SelectObject(dc, m_hFontNormal);
-    ::SetBkMode(dc, TRANSPARENT);
-    ::SetTextColor(dc, palette.textSecondary);
-    ::DrawTextW(dc, L"Paste an onion URL, e.g. http://....onion/file.dat", -1, &rect,
-                DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
-    ::SelectObject(dc, previousFont);
 }
 
 void OdWindow::ApplyRowHeight() {
@@ -1043,9 +1026,9 @@ void OdWindow::UpdateTheme(bool darkMode) {
             ::SendMessageW(m_hStatusBar, SB_SETBKCOLOR, 0, static_cast<LPARAM>(palette.surface));
         }
     } else {
-        ListView_SetBkColor(m_hListView, CLR_NONE);
-        ListView_SetTextBkColor(m_hListView, CLR_NONE);
-        ListView_SetTextColor(m_hListView, static_cast<COLORREF>(-1));
+        ListView_SetBkColor(m_hListView, palette.surface);
+        ListView_SetTextBkColor(m_hListView, palette.surface);
+        ListView_SetTextColor(m_hListView, palette.textPrimary);
         if (m_hListHeader) ::SetWindowTheme(m_hListHeader, L"Header", nullptr);
         if (m_hStatusBar) {
             ::SetWindowTheme(m_hStatusBar, L"Explorer", nullptr);
@@ -1108,6 +1091,11 @@ void OdWindow::OnToggleSelected() {
     if (task.status == core::TaskStatus::Active) {
         m_engine.Pause(task.gid);
     } else if (task.status != core::TaskStatus::Completed) {
+        if (!m_backendReady) {
+            ::MessageBoxW(m_hWnd, L"Tor is still starting. Try again once the status bar reports ready.",
+                          L"Please wait", MB_OK | MB_ICONINFORMATION);
+            return;
+        }
         m_engine.Resume(task.gid);
     }
     RefreshTaskView();
@@ -1140,12 +1128,15 @@ void OdWindow::OnRemoveSelected() {
 void OdWindow::RefreshTaskView() {
     const auto tasks = m_engine.GetAllTasks();
 
-    core::DownloadTask selected;
-    if (TryGetSelectedTask(selected)) {
+    const int selectedRow = ListView_GetNextItem(m_hListView, -1, LVNI_SELECTED);
+    const bool hasSelection = (selectedRow >= 0 && selectedRow < static_cast<int>(tasks.size()));
+    const core::DownloadTask selected = hasSelection ? tasks[static_cast<size_t>(selectedRow)] : core::DownloadTask{};
+
+    if (hasSelection) {
         SetWindowTextIfChanged(m_hBtnPause,
                          selected.status == core::TaskStatus::Active ? L"Pause" : L"Resume");
     }
-    const bool hasSelection = TryGetSelectedTask(selected);
+
     EnableWindowIfChanged(m_hBtnPause, hasSelection && selected.status != core::TaskStatus::Completed);
     EnableWindowIfChanged(m_hBtnRemove, hasSelection);
 
@@ -1153,7 +1144,7 @@ void OdWindow::RefreshTaskView() {
         ListView_DeleteItem(m_hListView, ListView_GetItemCount(m_hListView) - 1);
     }
 
-    m_rowProgress.assign(tasks.size(), 0.0);
+    m_rowProgress.resize(tasks.size(), -1.0);
 
     for (size_t i = 0; i < tasks.size(); ++i) {
         const auto& task = tasks[i];
@@ -1167,8 +1158,16 @@ void OdWindow::RefreshTaskView() {
         }
 
         const bool active = (task.status == core::TaskStatus::Active);
-        m_rowProgress[i] = (task.status == core::TaskStatus::Completed) ? 100.0
-                                                                       : task.GetProgressPercent();
+        const double newProgress = (task.status == core::TaskStatus::Completed) ? 100.0 : task.GetProgressPercent();
+        
+        if (m_rowProgress[i] != newProgress) {
+            m_rowProgress[i] = newProgress;
+            RECT cell{};
+            if (ListView_GetSubItemRect(m_hListView, row, kProgressColumn, LVIR_BOUNDS, &cell)) {
+                ::InvalidateRect(m_hListView, &cell, FALSE);
+            }
+        }
+
 
         Controls::SetListSubItem(m_hListView, row, 1,
             task.totalBytes > 0 ? core::StringUtils::FormatBytes(task.totalBytes).c_str() : L"--");

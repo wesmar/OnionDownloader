@@ -70,6 +70,8 @@ private:
         std::filesystem::path finalPath;
         uint32_t workers{10};
         bool rangeSupported{true};
+        bool powGateRequired{false};
+        std::string sessionCookie;
 
         std::unique_ptr<SegmentMap> segments;
         std::unique_ptr<PartFile> file;
