@@ -12,6 +12,21 @@
 
 > Archive password: `github.com`. Extract `od_x64.exe` or `od_arm64.exe`.
 
+<details>
+<summary>Digital signature (Authenticode — Certum Open Source Code Signing)</summary>
+
+Both release binaries (`od_x64.exe`, `od_arm64.exe`) are digitally signed and timestamped:
+
+- **Signer:** `CN=Open Source Developer Marek Wesołowski, O=Open Source Developer, L=Warszawa, S=mazowieckie, C=PL`
+- **Issuer:** `Certum Code Signing 2021 CA` (`Asseco Data Systems S.A.`)
+- **Timestamp:** `Certum Timestamp` (RFC 3161)
+
+Verify locally in PowerShell:
+```powershell
+Get-AuthenticodeSignature .\od_x64.exe | Format-List Status, SignerCertificate, TimeStamperCertificate
+```
+</details>
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20x64%20%7C%20ARM64-blue.svg)]()
 [![Language](https://img.shields.io/badge/Language-C%2B%2B23-22c55e.svg)]()
@@ -38,8 +53,8 @@
 > **Engineering status**
 >
 > `Onion Downloader` is a compact, self-contained Windows download manager written in pure **C++23** directly against the Win32 API. It packages a full graphical interface, a complete console client, an HTTP/SOCKS5 client, an NTFS sparse range writer, and an embedded, client-only **Tor 0.4.9.11** daemon into a single portable executable:
-> - **x64 (`od_x64.exe`):** <!--SIZE:od_x64.exe:bytes-->2,771,456<!--/SIZE--> bytes (<!--SIZE:od_x64.exe:kb-->2,707 KB<!--/SIZE-->, ~2.64 MiB), native `IMAGE_FILE_MACHINE_AMD64`
-> - **ARM64 (`od_arm64.exe`):** <!--SIZE:od_arm64.exe:bytes-->2,200,064<!--/SIZE--> bytes (<!--SIZE:od_arm64.exe:kb-->2,149 KB<!--/SIZE-->, ~2.10 MiB), native `IMAGE_FILE_MACHINE_ARM64` (Windows on ARM)
+> - **x64 (`od_x64.exe`):** <!--SIZE:od_x64.exe:bytes-->2,781,808<!--/SIZE--> bytes (<!--SIZE:od_x64.exe:kb-->2,717 KB<!--/SIZE-->, ~2.64 MiB), native `IMAGE_FILE_MACHINE_AMD64`
+> - **ARM64 (`od_arm64.exe`):** <!--SIZE:od_arm64.exe:bytes-->2,210,416<!--/SIZE--> bytes (<!--SIZE:od_arm64.exe:kb-->2,159 KB<!--/SIZE-->, ~2.10 MiB), native `IMAGE_FILE_MACHINE_ARM64` (Windows on ARM)
 >
 > Tor daemons are managed automatically in a Windows Job Object and extracted on demand from an in-memory LZX-21 cabinet appended to the icon resource. The engine incorporates an in-process **pure C++ SHA-256 Proof-of-Work (PoW) solver** (5–15 ms) for modern Onion anti-DDoS challenge gates (`/_gate/challenge` / `/_gate/verify`) and enforces **per-worker session cookie isolation** across circuits to bypass server-side connection concurrency throttling.
 
@@ -375,8 +390,8 @@ flowchart LR
 
 | Artifact | Target Architecture | Machine Type | File Size | SHA-256 Checksum |
 |---|---|---|---:|---|
-| **`od_x64.exe`** | Intel / AMD x64 | `AMD64` (0x8664) | <!--SIZE:od_x64.exe:bytes-->2,771,456<!--/SIZE--> B (<!--SIZE:od_x64.exe:kb-->2,707 KB<!--/SIZE-->) | `7ab04fa875c553f8c0b48071e6751d710ab5149bcb164c39e6c6db55763d005f` |
-| **`od_arm64.exe`** | Windows on ARM | `ARM64` (0xAA64) | <!--SIZE:od_arm64.exe:bytes-->2,200,064<!--/SIZE--> B (<!--SIZE:od_arm64.exe:kb-->2,149 KB<!--/SIZE-->) | `d8e7acb3ebf2e18db335a8cc039d0429aa29ea7cbcce06211356717a6fd3cf21` |
+| **`od_x64.exe`** | Intel / AMD x64 | `AMD64` (0x8664) | <!--SIZE:od_x64.exe:bytes-->2,781,808<!--/SIZE--> B (<!--SIZE:od_x64.exe:kb-->2,717 KB<!--/SIZE-->) | `7ab04fa875c553f8c0b48071e6751d710ab5149bcb164c39e6c6db55763d005f` |
+| **`od_arm64.exe`** | Windows on ARM | `ARM64` (0xAA64) | <!--SIZE:od_arm64.exe:bytes-->2,210,416<!--/SIZE--> B (<!--SIZE:od_arm64.exe:kb-->2,159 KB<!--/SIZE-->) | `d8e7acb3ebf2e18db335a8cc039d0429aa29ea7cbcce06211356717a6fd3cf21` |
 | **`app.ico`** (payload) | Embedded Cabinet | LZX-21 | 2,266,596 B (2,213 KB) | Appended to standard Win32 multi-res ICO |
 | **`app-arm64.ico`** | Embedded Cabinet | LZX-21 | 1,675,708 B (1,636 KB) | Appended to standard Win32 multi-res ICO |
 
